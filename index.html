@@ -580,30 +580,47 @@
     }
     
     // ==================== ACTUALIZAR RESÚMENES (CORREGIDO) ====================
-    function actualizarResumen() {
-        const ventas = obtenerVentas();
-        const hoy = new Date().toISOString().split('T')[0];
-        const mesActual = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
+    // ==================== ACTUALIZAR RESÚMENES (CORREGIDO - SUMA EFECTIVO + TRANSFERENCIA) ====================
+function actualizarResumen() {
+    const ventas = obtenerVentas();
+    const hoy = new Date().toISOString().split('T')[0];
+    const mesActual = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
+    
+    let totalEfectivoHoy = 0;
+    let totalTransferHoy = 0;
+    let totalEfectivoMes = 0;
+    let totalTransferMes = 0;
+    
+    ventas.forEach(venta => {
+        const efectivo = venta.efectivoRecibido || 0;
+        const transfer = venta.transferenciaRecibida || 0;
         
-        let ventasHoy = 0;
-        let efectivoHoy = 0;
-        let transferHoy = 0;
-        let ventasMes = 0;
-        
-        ventas.forEach(venta => {
-            // Sumar ventas del día
-            if (venta.dia === hoy) {
-                ventasHoy += venta.total;
-                efectivoHoy += venta.efectivoRecibido || 0;
-                transferHoy += venta.transferenciaRecibida || 0;
-            }
-            // Sumar ventas del mes
-            if (venta.mes === mesActual) {
-                ventasMes += venta.total;
-            }
-        });
-        
-        // Actualizar interfaz
+        // Sumar del día
+        if (venta.dia === hoy) {
+            totalEfectivoHoy += efectivo;
+            totalTransferHoy += transfer;
+        }
+        // Sumar del mes
+        if (venta.mes === mesActual) {
+            totalEfectivoMes += efectivo;
+            totalTransferMes += transfer;
+        }
+    });
+    
+    // Mostrar en la interfaz
+    document.getElementById('ventasHoy').innerText = (totalEfectivoHoy + totalTransferHoy).toFixed(2);
+    document.getElementById('efectivoHoy').innerText = totalEfectivoHoy.toFixed(2);
+    document.getElementById('transferHoy').innerText = totalTransferHoy.toFixed(2);
+    document.getElementById('ventasMes').innerText = (totalEfectivoMes + totalTransferMes).toFixed(2);
+    
+    console.log('Resumen corregido:', { 
+        ventasHoy: totalEfectivoHoy + totalTransferHoy, 
+        efectivoHoy: totalEfectivoHoy, 
+        transferHoy: totalTransferHoy,
+        ventasMes: totalEfectivoMes + totalTransferMes 
+    });
+}
+    // Actualizar interfaz
         document.getElementById('ventasHoy').innerText = ventasHoy.toFixed(2);
         document.getElementById('efectivoHoy').innerText = efectivoHoy.toFixed(2);
         document.getElementById('transferHoy').innerText = transferHoy.toFixed(2);
