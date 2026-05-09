@@ -1,11 +1,11 @@
 {
   "name": "Mi Mercadito POS",
   "short_name": "POS Mercadito",
-  "description": "Punto de venta offline para mi mercadito",
-  "start_url": ".",
+  "description": "Punto de venta offline - Versión Azul",
+  "start_url": "./?v=2",   // ← AÑADE ?v=2
   "display": "standalone",
-  "background_color": "#2c3e50",
-  "theme_color": "#2c3e50",
+  "background_color": "#1e4a76",
+  "theme_color": "#1e4a76",
   "icons": [
     {
       "src": "icon-192.png",
