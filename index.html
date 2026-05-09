@@ -116,7 +116,33 @@
     </div>
   </div>
 </div>
-
+<script>
+  // AUTO-DESTRUCCIÓN DE SERVICE WORKERS ANTERIORES
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for(let registration of registrations) {
+        console.log('Desregistrando SW:', registration);
+        registration.unregister();
+      }
+    });
+  }
+  
+  // Limpiar toda caché
+  if ('caches' in window) {
+    caches.keys().then(function(names) {
+      for (let name of names) {
+        caches.delete(name);
+        console.log('Caché eliminada:', name);
+      }
+    });
+  }
+  
+  // Recargar la página después de limpiar (excepto si ya es la primera vez)
+  if (!sessionStorage.getItem('cache_limpia')) {
+    sessionStorage.setItem('cache_limpia', 'true');
+    location.reload(true);
+  }
+</script>
 <script src="pos.js"></script>
 <script>
   // Funcionalidad del menú hamburguesa
