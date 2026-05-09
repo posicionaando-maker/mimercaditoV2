@@ -32,7 +32,6 @@
     .panel { display: block; }
     .panel.oculto { display: none; }
     
-    /* Pantalla Vender */
     .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 1rem; }
     @media (max-width: 800px) { .main-grid { grid-template-columns: 1fr; } }
     
@@ -62,7 +61,6 @@
     .sec { background: #6c9ebf; color: white; }
     .btn-warning { background: #e67e22; color: white; }
     
-    /* Tabla de gestión */
     .tabla-container { background: white; border-radius: 24px; padding: 1rem; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #cde3f5; }
@@ -70,14 +68,12 @@
     .editar-btn { background: #2c6e9e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-right: 5px; }
     .ajuste-btn { background: #e67e22; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; }
     
-    /* Reportes */
     .reportes-container { background: white; border-radius: 24px; padding: 1.2rem; border: 1px solid #bdd4e8; }
     .filtros { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
     .reportes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
     .reporte-card { background: #f9fcff; padding: 1rem; border-radius: 20px; border-left: 5px solid #2c6e9e; }
     .full-width { grid-column: 1 / -1; }
     
-    /* Modales */
     .modal {
       display: none;
       position: fixed;
@@ -125,7 +121,7 @@
     <button id="btnVerReportes" class="sec">📈 Ver Reportes</button>
   </div>
 
-  <!-- PANEL VENDER (Pantalla principal) -->
+  <!-- PANEL VENDER -->
   <div id="venderPanel" class="panel">
     <div class="main-grid">
       <div class="products">
@@ -158,17 +154,20 @@
     </div>
   </div>
 
-  <!-- PANEL GESTIONAR INVENTARIO (Tabla completa) -->
+  <!-- PANEL GESTIONAR INVENTARIO -->
   <div id="gestionPanel" class="panel oculto">
     <button id="btnCerrarGestion" class="btn-danger" style="margin-bottom:1rem;">← Volver a Ventas</button>
     <div class="tabla-container">
-      <h3>📋 Inventario completo</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3>📋 Inventario completo</h3>
+        <button id="btnNuevoProductoGestion" class="btn-success">✨ Nuevo producto</button>
+      </div>
       <table id="tablaInventario">
         <thead>
           <tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Costo</th><th>Stock</th><th>Acciones</th></tr>
         </thead>
         <tbody id="tablaBody"></tbody>
-      </table>
+      8d
     </div>
   </div>
 
@@ -217,6 +216,22 @@
       <div class="modal-buttons">
         <button id="btnConfirmarAjuste" class="btn-success">Aplicar</button>
         <button id="btnCancelarAjuste" class="btn-danger">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL Nuevo Producto (desde gestión) -->
+  <div id="modalNuevoProductoGestion" class="modal">
+    <div class="modal-content">
+      <h3>✨ Nuevo producto</h3>
+      <input type="text" id="nuevoNombreGestion" placeholder="Nombre del producto">
+      <input type="text" id="nuevoCategoriaGestion" placeholder="Categoría">
+      <input type="number" id="nuevoPrecioGestion" placeholder="Precio de venta" step="any">
+      <input type="number" id="nuevoCostoGestion" placeholder="Costo" step="any">
+      <input type="number" id="nuevoStockGestion" placeholder="Stock inicial" step="1">
+      <div class="modal-buttons">
+        <button id="btnConfirmarNuevoGestion" class="btn-success">Crear producto</button>
+        <button id="btnCancelarNuevoGestion" class="btn-danger">Cancelar</button>
       </div>
     </div>
   </div>
@@ -349,11 +364,45 @@
     document.getElementById('transferencia').addEventListener('input', verificarPagoTransferencia);
     document.getElementById('buscar').addEventListener('input', () => renderProductos());
 
-    // Modales
+    // Modales de edición y ajuste
     document.getElementById('btnGuardarEdicion').onclick = guardarEdicionProducto;
     document.getElementById('btnCancelarEdicion').onclick = cerrarModalEditar;
     document.getElementById('btnConfirmarAjuste').onclick = confirmarAjusteStock;
     document.getElementById('btnCancelarAjuste').onclick = cerrarModalAjuste;
+    
+    // Nuevo producto desde gestión
+    document.getElementById('btnNuevoProductoGestion').onclick = () => {
+      document.getElementById('modalNuevoProductoGestion').style.display = 'flex';
+    };
+    document.getElementById('btnConfirmarNuevoGestion').onclick = () => {
+      const nombre = document.getElementById('nuevoNombreGestion').value.trim();
+      const categoria = document.getElementById('nuevoCategoriaGestion').value.trim();
+      const precio = parseFloat(document.getElementById('nuevoPrecioGestion').value);
+      const costo = parseFloat(document.getElementById('nuevoCostoGestion').value);
+      const stock = parseInt(document.getElementById('nuevoStockGestion').value);
+      
+      if (!nombre || isNaN(precio) || isNaN(costo) || isNaN(stock)) {
+        alert('Complete todos los campos correctamente');
+        return;
+      }
+      
+      const nuevoProducto = {
+        id: nextId++,
+        nombre: nombre,
+        categoria: categoria || 'General',
+        cantidad: stock,
+        precioVenta: precio,
+        costo: costo
+      };
+      inventario.productos.push(nuevoProducto);
+      guardarInventarioEnLocal();
+      renderProductos();
+      renderTablaInventario();
+      alert(`✅ Producto "${nombre}" creado con stock ${stock}`);
+      cerrarModalNuevoGestion();
+      limpiarFormularioNuevoGestion();
+    };
+    document.getElementById('btnCancelarNuevoGestion').onclick = cerrarModalNuevoGestion;
   }
 
   function cambiarPanel(panel) {
@@ -389,7 +438,7 @@
   function renderTablaInventario() {
     const tbody = document.getElementById('tablaBody');
     if (!inventario.productos.length) {
-      tbody.innerHTML = '<tr><td colspan="6">No hay productos. Importe un inventario.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6">No hay productos. Importe un inventario o cree uno nuevo.</td></tr>';
       return;
     }
     tbody.innerHTML = inventario.productos.map(p => `
@@ -475,11 +524,23 @@
     productoAjustandoId = null;
   }
 
+  function cerrarModalNuevoGestion() {
+    document.getElementById('modalNuevoProductoGestion').style.display = 'none';
+  }
+  
+  function limpiarFormularioNuevoGestion() {
+    document.getElementById('nuevoNombreGestion').value = '';
+    document.getElementById('nuevoCategoriaGestion').value = '';
+    document.getElementById('nuevoPrecioGestion').value = '';
+    document.getElementById('nuevoCostoGestion').value = '';
+    document.getElementById('nuevoStockGestion').value = '';
+  }
+
   // ====================== CATÁLOGO (Vender) ======================
   function renderProductos() {
     const buscar = document.getElementById('buscar').value.toLowerCase();
     if (inventario.productos.length === 0) {
-      document.getElementById('productList').innerHTML = '📂 Sin inventario. Use el menú ☰ para importar.';
+      document.getElementById('productList').innerHTML = '📂 Sin inventario. Use el menú ☰ para importar o crear productos.';
       return;
     }
     const filtrados = inventario.productos.filter(p => p.nombre.toLowerCase().includes(buscar));
@@ -611,7 +672,7 @@
     renderCarrito();
   }
 
-  // ====================== REPORTES AVANZADOS ======================
+  // ====================== REPORTES ======================
   function actualizarReportes() {
     const ahora = new Date();
     const hoyInicio = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()).getTime();
@@ -638,7 +699,6 @@
     document.getElementById('gananciaNeta').innerHTML = `$${gananciaMes.toFixed(2)}`;
     document.getElementById('totalGeneral').innerHTML = `$${totalGeneral.toFixed(2)}<br>${ventas.length} ventas`;
     
-    // Producto más vendido (total histórico)
     const prodCount = {};
     ventas.forEach(v => {
       v.items.forEach(item => { prodCount[item.nombre] = (prodCount[item.nombre] || 0) + item.cantidad; });
@@ -646,7 +706,6 @@
     const top = Object.entries(prodCount).sort((a,b) => b[1]-a[1])[0];
     document.getElementById('topProducto').innerHTML = top ? `${top[0]}: ${top[1]} uds` : 'Sin ventas';
     
-    // Stock bajo
     const bajoStock = inventario.productos.filter(p => p.cantidad <= 3);
     document.getElementById('stockBajoLista').innerHTML = bajoStock.length ? bajoStock.map(p => `⚠️ ${p.nombre} (${p.cantidad})`).join(', ') : '✅ Todo en orden';
   }
