@@ -1,0 +1,220 @@
+/* RESET: elimina márgenes y paddings por defecto */
+* { 
+  box-sizing: border-box;  /* hace que el padding no afecte el ancho total */
+  margin: 0; 
+  padding: 0; 
+}
+
+/* Fondo general y fuente del sistema (rápida y legible) */
+body { 
+  font-family: system-ui, -apple-system, sans-serif; 
+  background: #f0f2f5; 
+  padding: 16px; 
+}
+
+/* Contenedor principal con ancho máximo para pantallas grandes */
+.app { 
+  max-width: 1400px; 
+  margin: 0 auto; 
+}
+
+/* CABECERA: fondo oscuro, texto blanco, esquinas redondeadas */
+header { 
+  background: #2c3e50; 
+  color: white; 
+  padding: 1rem; 
+  border-radius: 16px; 
+  margin-bottom: 1rem; 
+  display: flex; 
+  flex-wrap: wrap;  /* permite que los botones bajen en móviles */
+  justify-content: space-between; 
+  align-items: center; 
+  gap: 10px; 
+}
+
+/* Grupo de botones de la cabecera */
+.header-buttons { 
+  display: flex; 
+  gap: 8px; 
+  flex-wrap: wrap; 
+}
+
+/* ESTILOS BASE DE BOTONES */
+button { 
+  background: #3498db; 
+  color: white; 
+  border: none; 
+  padding: 8px 16px; 
+  border-radius: 40px;  /* bordes redondeados tipo "píldora" */
+  cursor: pointer; 
+  font-weight: 500; 
+}
+
+/* Botón secundario (gris) */
+button.sec { background: #95a5a6; }
+
+/* Botón peligro (rojo) */
+button.btn-danger { background: #e74c3c; }
+
+/* Botón éxito (verde) */
+button.btn-success { background: #27ae60; }
+
+/* PESTAÑAS */
+.tabs { 
+  display: flex; 
+  gap: 8px; 
+  margin-bottom: 1rem; 
+}
+
+.tab { 
+  background: #bdc3c7; 
+  padding: 10px 20px; 
+  border-radius: 40px; 
+}
+
+.tab.active { 
+  background: #2c3e50; 
+  color: white; 
+}
+
+/* PANELES: solo se muestra el activo */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* GRID PRINCIPAL: dos columnas (catálogo y carrito) */
+.main-grid { 
+  display: grid; 
+  grid-template-columns: 1fr 380px; 
+  gap: 1rem; 
+}
+
+/* En móviles, las dos columnas se apilan */
+@media (max-width: 800px) { 
+  .main-grid { grid-template-columns: 1fr; } 
+}
+
+/* CATÁLOGO: fondo blanco con sombra */
+.products { 
+  background: white; 
+  border-radius: 16px; 
+  padding: 1rem; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+}
+
+/* Cuadrícula de productos (responsive: se ajusta automáticamente) */
+.product-list { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
+  gap: 12px; 
+  margin-top: 1rem; 
+  max-height: 60vh; 
+  overflow-y: auto;  /* scroll si hay muchos productos */
+}
+
+/* TARJETA DE PRODUCTO */
+.product-card { 
+  background: #fff; 
+  border: 1px solid #ddd; 
+  border-radius: 12px; 
+  padding: 12px; 
+  cursor: pointer; 
+  transition: 0.1s; 
+}
+
+/* Retroalimentación táctil (útil en móviles) */
+.product-card:active { background: #ecf0f1; }
+
+/* INSIGNIA DE STOCK */
+.stock-badge { 
+  font-size: 12px; 
+  background: #e74c3c; 
+  color: white; 
+  padding: 2px 8px; 
+  border-radius: 20px; 
+  display: inline-block; 
+}
+
+/* Clase especial para stock bajo (≤3) */
+.low-stock { background: #f39c12; }
+
+.price { 
+  font-size: 1.3rem; 
+  font-weight: bold; 
+  color: #27ae60; 
+  margin: 6px 0; 
+}
+
+/* CARRITO */
+.cart { 
+  background: white; 
+  border-radius: 16px; 
+  padding: 1rem; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+  display: flex; 
+  flex-direction: column; 
+  gap: 1rem; 
+}
+
+.cart-item { 
+  display: flex; 
+  justify-content: space-between; 
+  border-bottom: 1px solid #ddd; 
+  padding: 8px 0; 
+  font-size: 0.9rem; 
+}
+
+.total { 
+  font-size: 1.4rem; 
+  border-top: 2px solid #2c3e50; 
+  padding-top: 10px; 
+}
+
+/* SECCIÓN DE PAGO */
+.pago-section { 
+  background: #f8f9fa; 
+  padding: 12px; 
+  border-radius: 12px; 
+}
+
+.pago-section input { 
+  width: 100px; 
+  margin-left: 8px; 
+}
+
+.cart-buttons { display: flex; gap: 10px; }
+
+/* REPORTES */
+.reportes-container { 
+  background: white; 
+  border-radius: 16px; 
+  padding: 1rem; 
+}
+
+.filtros { 
+  margin-bottom: 1rem; 
+  display: flex; 
+  gap: 12px; 
+  align-items: center; 
+}
+
+.reportes-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+  gap: 1rem; 
+}
+
+.reporte-card { 
+  background: #f8f9fa; 
+  padding: 1rem; 
+  border-radius: 16px; 
+}
+
+.full-width { grid-column: 1 / -1; }  /* ocupa todo el ancho */
+
+.venta-info { 
+  font-size: 0.9rem; 
+  padding: 6px; 
+  background: #ecf0f1; 
+  border-radius: 8px; 
+  margin-top: 6px; 
+}
