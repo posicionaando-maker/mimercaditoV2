@@ -10,7 +10,31 @@
  * - PWA instalable en el móvil de la empleada
  * ====================================================================
  */
-
+/**
+ * FORZAR ACTUALIZACIÓN DESDE SERVICE WORKER
+ */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for (let registration of registrations) {
+      registration.update();  // Forzar buscar nueva versión
+      console.log('Buscando actualización del Service Worker');
+    }
+  });
+  
+  // Además, limpiar cachés manualmente
+  if ('caches' in window) {
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (cacheName !== 'mi-mercadito-pos-v2') {
+            console.log('Eliminando caché:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    });
+  }
+}
 // ====================== ESTADO GLOBAL ======================
 // inventario: objeto con la estructura { productos: [...] }
 let inventario = { productos: [] };
