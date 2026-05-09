@@ -3,84 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <!-- viewport-fit=cover es importante para que la PWA ocupe toda la pantalla en iPhone con notch -->
-  
   <title>Mi Mercadito POS</title>
-  
-  <!-- Archivos de la PWA -->
   <link rel="manifest" href="manifest.json">
-  <!-- icono para agregar a pantalla de inicio en iOS -->
   <link rel="apple-touch-icon" href="icon-512.png">
-  <!-- color de la barra de estado en Android -->
-  <meta name="theme-color" content="#2c3e50">
-  
+  <meta name="theme-color" content="#1e4a76">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app">
   
-  <!-- CABECERA: siempre visible -->
+  <!-- CABECERA SIMPLIFICADA -->
   <header>
     <h2>🛒 Mi Mercadito POS</h2>
-    <div class="header-buttons">
-      <!-- Los 3 botones principales de importación/exportación -->
-      <button id="btnImportarInventario" class="sec">📂 Importar inventario.json</button>
-      <button id="btnExportarInventario" class="sec">📤 Exportar inventario</button>
-      <button id="btnExportarVentas" class="sec">📊 Exportar ventas.json</button>
-    </div>
+    <!-- Menú hamburguesa para acciones secundarias -->
+    <div class="menu-icon" id="menuIcon">☰</div>
   </header>
 
-  <!-- PESTAÑAS: permiten cambiar entre vender y ver reportes -->
+  <!-- Menú desplegable (oculto por defecto) -->
+  <div id="menuSecundario" class="menu-secundario">
+    <button id="btnImportarInventario" class="sec">📂 Importar inventario</button>
+    <button id="btnExportarInventario" class="sec">📤 Exportar inventario</button>
+    <button id="btnExportarVentas" class="sec">📊 Exportar ventas</button>
+  </div>
+
+  <!-- PESTAÑAS PRINCIPALES -->
   <div class="tabs">
     <button id="tabVender" class="tab active">🛒 Vender</button>
     <button id="tabReportes" class="tab">📈 Reportes</button>
   </div>
 
-  <!-- PANEL DE VENTAS (visible por defecto) -->
+  <!-- PANEL DE VENTAS (PRINCIPAL) -->
   <div id="venderPanel" class="panel active">
     <div class="main-grid">
-      
-      <!-- COLUMNA IZQUIERDA: catálogo de productos -->
+      <!-- Catálogo -->
       <div class="products">
-        <h3>📦 Productos</h3>
-        <!-- Campo de búsqueda en tiempo real -->
-        <input type="text" id="buscar" placeholder="🔍 Buscar..." style="width:100%">
-        <!-- Aquí se renderizarán dinámicamente los productos -->
+        <div class="busqueda-container">
+          <input type="text" id="buscar" placeholder="🔍 Buscar producto..." class="busqueda-input">
+        </div>
         <div id="productList" class="product-list">Cargue inventario.json</div>
       </div>
 
-      <!-- COLUMNA DERECHA: carrito de compras -->
+      <!-- Carrito + Pago -->
       <div class="cart">
         <h3>🧾 Venta actual</h3>
-        <div id="cartItems"></div>
+        <div id="cartItems" class="cart-items"></div>
         <div class="total">Total: <strong>$<span id="totalCarrito">0.00</span></strong></div>
         
-        <!-- Zona de pago mixto (característica especial para Cuba) -->
         <div class="pago-section">
-          <label>💰 Efectivo recibido: $<input type="number" id="efectivo" step="any" value="0"></label>
-          <label>💸 Transferencia recibida: $<input type="number" id="transferencia" step="any" value="0"></label>
-          <!-- Mensaje dinámico que muestra si falta dinero o cuánto es el cambio -->
+          <div class="pago-campo">
+            <label>💰 Efectivo:</label>
+            <input type="number" id="efectivo" step="any" value="0" class="pago-input">
+          </div>
+          <div class="pago-campo">
+            <label>📲 Transferencia:</label>
+            <input type="number" id="transferencia" step="any" value="0" class="pago-input">
+          </div>
           <div id="restanteMsg" class="venta-info"></div>
         </div>
 
         <div class="cart-buttons">
           <button id="finalizarVenta" class="btn-success" disabled>✅ Finalizar venta</button>
-          <button id="limpiarCarrito" class="btn-danger">🗑 Limpiar carrito</button>
+          <button id="limpiarCarrito" class="btn-danger">🗑 Limpiar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- PANEL DE REPORTES (oculto inicialmente) -->
+  <!-- PANEL DE REPORTES (SECUNDARIO) -->
   <div id="reportesPanel" class="panel">
     <div class="reportes-container">
-      <!-- Filtro por mes para ver acumulados -->
       <div class="filtros">
-        <label>📅 Ver mes: <input type="month" id="filtroMes"></label>
-        <button id="actualizarReportes" class="sec">Actualizar</button>
+        <label>📅 Mes: <input type="month" id="filtroMes"></label>
+        <button id="actualizarReportes" class="btn-actualizar">Actualizar</button>
       </div>
-      
-      <!-- Cuadrícula de indicadores clave -->
       <div class="reportes-grid">
         <div class="reporte-card">
           <h4>📆 Ventas del día</h4>
@@ -115,7 +110,13 @@
   </div>
 </div>
 
-<!-- JavaScript principal -->
 <script src="pos.js"></script>
+<script>
+  // Funcionalidad del menú hamburguesa
+  document.getElementById('menuIcon').addEventListener('click', function() {
+    const menu = document.getElementById('menuSecundario');
+    menu.classList.toggle('mostrar');
+  });
+</script>
 </body>
 </html>
