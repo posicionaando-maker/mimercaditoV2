@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Mi Mercadito POS</title>
   
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <!-- ANTI-CACHÉ EXTREMO -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+  <meta http-equiv="Expires" content="-1">
   
   <link rel="manifest" href="data:application/manifest+json,{
     %22name%22:%22Mi%20Mercadito%20POS%22,
     %22short_name%22:%22POS%22,
-    %22start_url%22:%22.%22,
+    %22start_url%22:%22.?v=%22+Date.now(),
     %22display%22:%22standalone%22,
     %22background_color%22:%22#1e4a76%22,
     %22theme_color%22:%22#1e4a76%22
@@ -20,6 +21,7 @@
   <meta name="theme-color" content="#1e4a76">
   
   <style>
+    /* ===== TODO EL CSS AQUÍ (igual que antes) ===== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #f0f7ff; padding: 12px; }
     .app { max-width: 1400px; margin: 0 auto; }
@@ -287,10 +289,11 @@
     renderCarrito();
     cambiarPanel('vender');
     
-    // Forzar limpieza de Service Workers
+    // Eliminar Service Workers anteriores
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
         registrations.forEach(r => r.unregister());
+        console.log('Service Workers desregistrados');
       });
     }
   });
@@ -678,19 +681,19 @@
     
     const ahora = new Date();
     
-    // 1. Ventas de HOY (desde las 00:00 hasta ahora)
+    // 1. Ventas de HOY
     const hoyInicio = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()).getTime();
     const ventasHoy = ventas.filter(v => new Date(v.fecha).getTime() >= hoyInicio);
     const totalHoy = ventasHoy.reduce((s, v) => s + v.total, 0);
     document.getElementById('ventasHoy').innerHTML = `<strong>$${totalHoy.toFixed(2)}</strong><br>${ventasHoy.length} ventas`;
     
-    // 2. Ventas de la SEMANA (últimos 7 días)
+    // 2. Ventas de la SEMANA
     const semanaInicio = hoyInicio - 6 * 24 * 60 * 60 * 1000;
     const ventasSemana = ventas.filter(v => new Date(v.fecha).getTime() >= semanaInicio);
     const totalSemana = ventasSemana.reduce((s, v) => s + v.total, 0);
     document.getElementById('ventasSemana').innerHTML = `<strong>$${totalSemana.toFixed(2)}</strong><br>${ventasSemana.length} ventas`;
     
-    // 3. Ventas del MES seleccionado en el filtro
+    // 3. Ventas del MES seleccionado
     const mesSeleccionado = document.getElementById('filtroMes').value;
     let ventasMes = [];
     let totalMes = 0;
@@ -708,11 +711,11 @@
     document.getElementById('ventasMes').innerHTML = `<strong>$${totalMes.toFixed(2)}</strong><br>${ventasMes.length} ventas`;
     document.getElementById('gananciaNeta').innerHTML = `<strong>$${gananciaMes.toFixed(2)}</strong>`;
     
-    // 4. Total GENERAL (histórico)
+    // 4. Total GENERAL
     const totalGeneral = ventas.reduce((s, v) => s + v.total, 0);
     document.getElementById('totalGeneral').innerHTML = `<strong>$${totalGeneral.toFixed(2)}</strong><br>${ventas.length} ventas`;
     
-    // 5. Producto más vendido (de todo el histórico)
+    // 5. Producto más vendido
     const prodCount = {};
     ventas.forEach(v => {
       if (v.items && Array.isArray(v.items)) {
@@ -729,7 +732,7 @@
       document.getElementById('topProducto').innerHTML = 'Sin ventas aún';
     }
     
-    // 6. Stock bajo (productos con cantidad ≤ 3)
+    // 6. Stock bajo
     const bajoStock = inventario.productos.filter(p => p.cantidad <= 3);
     if (bajoStock.length > 0) {
       document.getElementById('stockBajoLista').innerHTML = bajoStock.map(p => `⚠️ ${p.nombre}: ${p.cantidad} uds`).join('<br>');
@@ -741,10 +744,6 @@
   }
 </script>
 
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW no registrado'));
-  }
-</script>
+<!-- NO SERVICE WORKER - para evitar caché -->
 </body>
 </html>
