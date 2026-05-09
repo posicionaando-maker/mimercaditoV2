@@ -5,7 +5,7 @@
  */
 
 // Nombre de la caché (cambiar para forzar actualizaciones)
-const CACHE_NAME = 'mi-mercadito-pos-v1';
+const CACHE_NAME = 'mi-mercadito-pos-v2';
 
 // Lista de archivos que queremos cachear para uso offline
 const ARCHIVOS_CACHE = [
