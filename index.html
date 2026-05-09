@@ -1,59 +1,321 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
- <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Mi Mercadito POS</title>
   
-  <!-- FORZAR ACTUALIZACIÓN -->
+  <!-- FORZAR ACTUALIZACIÓN TOTAL -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-512.png">
+  <!-- PWA -->
+  <link rel="manifest" href="data:application/manifest+json,{
+    %22name%22:%22Mi%20Mercadito%20POS%22,
+    %22short_name%22:%22POS%22,
+    %22start_url%22:%22.%22,
+    %22display%22:%22standalone%22,
+    %22background_color%22:%22#1e4a76%22,
+    %22theme_color%22:%22#1e4a76%22
+  }">
   <meta name="theme-color" content="#1e4a76">
-  <link rel="stylesheet" href="styles.css?v=2">
+  
+  <style>
+    /* ===== RESET Y BASE ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: #f0f7ff;
+      padding: 12px; 
+    }
+
+    .app { max-width: 1200px; margin: 0 auto; }
+
+    /* ===== CABECERA ===== */
+    header { 
+      background: #1e4a76;
+      color: white; 
+      padding: 0.8rem 1rem; 
+      border-radius: 20px; 
+      margin-bottom: 1rem; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .menu-icon {
+      font-size: 1.8rem;
+      cursor: pointer;
+      padding: 0 8px;
+      user-select: none;
+      background: none;
+      border: none;
+      color: white;
+    }
+
+    /* Menú desplegable */
+    .menu-secundario {
+      display: none;
+      background: white;
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 1rem;
+      gap: 8px;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 1px solid #cde3f5;
+    }
+
+    .menu-secundario.mostrar {
+      display: flex;
+    }
+
+    /* ===== PESTAÑAS ===== */
+    .tabs { 
+      display: flex; 
+      gap: 12px; 
+      margin-bottom: 1.2rem; 
+    }
+
+    .tab { 
+      background: #cde3f5; 
+      color: #1e4a76;
+      padding: 10px 24px; 
+      border-radius: 40px; 
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tab.active { 
+      background: #2c6e9e; 
+      color: white; 
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* ===== PANELES ===== */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ===== GRID PRINCIPAL ===== */
+    .main-grid { 
+      display: grid; 
+      grid-template-columns: 1fr 380px; 
+      gap: 1rem; 
+    }
+
+    @media (max-width: 800px) { 
+      .main-grid { grid-template-columns: 1fr; } 
+    }
+
+    /* ===== CATÁLOGO ===== */
+    .products { 
+      background: white; 
+      border-radius: 24px; 
+      padding: 1rem; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #bdd4e8;
+    }
+
+    .busqueda-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 48px;
+      border: 1px solid #cde3f5;
+      font-size: 1rem;
+      background: #f9fcff;
+      margin-bottom: 1rem;
+    }
+
+    .product-list { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+      gap: 12px; 
+      max-height: 55vh; 
+      overflow-y: auto; 
+    }
+
+    .product-card { 
+      background: #f9fcff; 
+      border: 1px solid #cde3f5; 
+      border-radius: 20px; 
+      padding: 12px; 
+      cursor: pointer; 
+      transition: all 0.1s ease;
+    }
+
+    .product-card:active { background: #e3f0fc; transform: scale(0.98); }
+
+    .stock-badge { 
+      font-size: 12px; 
+      background: #2c6e9e; 
+      color: white; 
+      padding: 3px 10px; 
+      border-radius: 30px; 
+      display: inline-block; 
+    }
+
+    .low-stock { background: #e67e22; }
+
+    .price { 
+      font-size: 1.3rem; 
+      font-weight: bold; 
+      color: #1e4a76; 
+      margin: 8px 0; 
+    }
+
+    /* ===== CARRITO ===== */
+    .cart { 
+      background: white; 
+      border-radius: 24px; 
+      padding: 1.2rem; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #bdd4e8;
+      display: flex; 
+      flex-direction: column; 
+      gap: 1rem; 
+    }
+
+    .cart-items { max-height: 320px; overflow-y: auto; }
+
+    .cart-item { 
+      display: flex; 
+      justify-content: space-between; 
+      border-bottom: 1px solid #cde3f5; 
+      padding: 10px 0; 
+      font-size: 0.9rem; 
+    }
+
+    .total { 
+      font-size: 1.5rem; 
+      border-top: 2px solid #2c6e9e; 
+      padding-top: 12px; 
+      text-align: right;
+    }
+
+    .pago-section {
+      background: #e8f0fe;
+      padding: 14px;
+      border-radius: 20px;
+    }
+
+    .pago-campo {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    .pago-input {
+      width: 110px;
+      padding: 8px;
+      border-radius: 30px;
+      border: 1px solid #bdd4e8;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .venta-info {
+      font-size: 0.85rem;
+      padding: 8px;
+      background: #d4e4f5;
+      border-radius: 20px;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .cart-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    button {
+      border: none;
+      padding: 10px 16px;
+      border-radius: 48px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.1s;
+    }
+
+    button:active { transform: scale(0.97); }
+
+    .btn-success { background: #2c6e9e; color: white; }
+    .btn-danger { background: #c0392b; color: white; }
+    .sec { background: #6c9ebf; color: white; }
+
+    /* ===== REPORTES ===== */
+    .reportes-container {
+      background: white;
+      border-radius: 24px;
+      padding: 1.2rem;
+      border: 1px solid #bdd4e8;
+    }
+
+    .filtros {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .reportes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .reporte-card {
+      background: #f9fcff;
+      padding: 1rem;
+      border-radius: 20px;
+      border-left: 5px solid #2c6e9e;
+    }
+
+    .full-width { grid-column: 1 / -1; }
+
+    /* Scroll */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #e8f0fe; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #2c6e9e; border-radius: 10px; }
+  </style>
 </head>
 <body>
 <div class="app">
   
-  <!-- CABECERA SIMPLIFICADA -->
   <header>
     <h2>🛒 Mi Mercadito POS</h2>
-    <!-- Menú hamburguesa para acciones secundarias -->
-    <div class="menu-icon" id="menuIcon">☰</div>
+    <button class="menu-icon" id="menuIcon">☰</button>
   </header>
 
-  <!-- Menú desplegable (oculto por defecto) -->
   <div id="menuSecundario" class="menu-secundario">
     <button id="btnImportarInventario" class="sec">📂 Importar inventario</button>
     <button id="btnExportarInventario" class="sec">📤 Exportar inventario</button>
     <button id="btnExportarVentas" class="sec">📊 Exportar ventas</button>
   </div>
 
-  <!-- PESTAÑAS PRINCIPALES -->
   <div class="tabs">
     <button id="tabVender" class="tab active">🛒 Vender</button>
     <button id="tabReportes" class="tab">📈 Reportes</button>
   </div>
 
-  <!-- PANEL DE VENTAS (PRINCIPAL) -->
+  <!-- PANEL VENDER -->
   <div id="venderPanel" class="panel active">
     <div class="main-grid">
-      <!-- Catálogo -->
       <div class="products">
-        <div class="busqueda-container">
-          <input type="text" id="buscar" placeholder="🔍 Buscar producto..." class="busqueda-input">
-        </div>
-        <div id="productList" class="product-list">Cargue inventario.json</div>
+        <input type="text" id="buscar" placeholder="🔍 Buscar producto..." class="busqueda-input">
+        <div id="productList" class="product-list">📂 Cargue inventario.json</div>
       </div>
 
-      <!-- Carrito + Pago -->
       <div class="cart">
         <h3>🧾 Venta actual</h3>
-        <div id="cartItems" class="cart-items"></div>
+        <div id="cartItems" class="cart-items">🛒 Carrito vacío</div>
         <div class="total">Total: <strong>$<span id="totalCarrito">0.00</span></strong></div>
         
         <div class="pago-section">
@@ -76,80 +338,315 @@
     </div>
   </div>
 
-  <!-- PANEL DE REPORTES (SECUNDARIO) -->
+  <!-- PANEL REPORTES -->
   <div id="reportesPanel" class="panel">
     <div class="reportes-container">
       <div class="filtros">
         <label>📅 Mes: <input type="month" id="filtroMes"></label>
-        <button id="actualizarReportes" class="btn-actualizar">Actualizar</button>
+        <button id="actualizarReportes" class="sec">Actualizar</button>
       </div>
       <div class="reportes-grid">
-        <div class="reporte-card">
-          <h4>📆 Ventas del día</h4>
-          <div id="ventasHoy">-</div>
-        </div>
-        <div class="reporte-card">
-          <h4>💰 Total acumulado (mes)</h4>
-          <div id="totalMes">-</div>
-        </div>
-        <div class="reporte-card">
-          <h4>💵 Efectivo</h4>
-          <div id="totalEfectivo">-</div>
-        </div>
-        <div class="reporte-card">
-          <h4>📲 Transferencia</h4>
-          <div id="totalTransferencia">-</div>
-        </div>
-        <div class="reporte-card">
-          <h4>📈 Ganancia neta (mes)</h4>
-          <div id="gananciaNeta">-</div>
-        </div>
-        <div class="reporte-card">
-          <h4>⚠️ Stock bajo (≤3)</h4>
-          <div id="stockBajoLista">-</div>
-        </div>
-        <div class="reporte-card full-width">
-          <h4>🏆 Productos más vendidos (mes)</h4>
-          <div id="topProductos">-</div>
-        </div>
+        <div class="reporte-card"><h4>📆 Ventas del día</h4><div id="ventasHoy">-</div></div>
+        <div class="reporte-card"><h4>💰 Total acumulado (mes)</h4><div id="totalMes">-</div></div>
+        <div class="reporte-card"><h4>💵 Efectivo</h4><div id="totalEfectivo">-</div></div>
+        <div class="reporte-card"><h4>📲 Transferencia</h4><div id="totalTransferencia">-</div></div>
+        <div class="reporte-card"><h4>📈 Ganancia neta (mes)</h4><div id="gananciaNeta">-</div></div>
+        <div class="reporte-card"><h4>⚠️ Stock bajo (≤3)</h4><div id="stockBajoLista">-</div></div>
+        <div class="reporte-card full-width"><h4>🏆 Productos más vendidos (mes)</h4><div id="topProductos">-</div></div>
       </div>
     </div>
   </div>
 </div>
+
 <script>
-  // AUTO-DESTRUCCIÓN DE SERVICE WORKERS ANTERIORES
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-      for(let registration of registrations) {
-        console.log('Desregistrando SW:', registration);
-        registration.unregister();
-      }
+  // ====================== ESTADO GLOBAL ======================
+  let inventario = { productos: [] };
+  let carrito = [];
+  let ventas = [];
+  const STORAGE_VENTAS = 'ventas_acumuladas';
+
+  // ====================== INICIALIZACIÓN ======================
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarVentasDeLocal();
+    setupEventListeners();
+    renderCarrito();
+    cambiarTab('vender');
+    
+    // Forzar limpieza de Service Workers antiguos
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(r => r.unregister());
+      });
+    }
+  });
+
+  function setupEventListeners() {
+    // Menú hamburguesa
+    document.getElementById('menuIcon').onclick = () => {
+      document.getElementById('menuSecundario').classList.toggle('mostrar');
+    };
+
+    // Importar inventario
+    const inputFile = document.createElement('input');
+    inputFile.type = 'file';
+    inputFile.accept = '.json';
+    document.getElementById('btnImportarInventario').onclick = () => inputFile.click();
+    inputFile.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (data.productos) {
+            inventario = data;
+            renderProductos();
+            alert('✅ Inventario cargado correctamente');
+          } else throw new Error();
+        } catch(err) { alert('❌ Archivo inválido'); }
+      };
+      reader.readAsText(file);
+    };
+
+    // Exportar inventario (solo stock > 0)
+    document.getElementById('btnExportarInventario').onclick = () => {
+      if (!inventario.productos.length) return alert('No hay inventario');
+      const filtrado = { productos: inventario.productos.filter(p => p.cantidad > 0) };
+      if (filtrado.productos.length === 0) return alert('No hay productos con stock > 0');
+      const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+      descargarArchivo(JSON.stringify(filtrado, null, 2), `inventario_${timestamp}.json`);
+    };
+
+    // Exportar ventas
+    document.getElementById('btnExportarVentas').onclick = () => {
+      descargarArchivo(JSON.stringify(ventas, null, 2), `ventas_${new Date().toISOString().slice(0,10)}.json`);
+    };
+
+    // Tabs
+    document.getElementById('tabVender').onclick = () => cambiarTab('vender');
+    document.getElementById('tabReportes').onclick = () => { cambiarTab('reportes'); actualizarReportes(); };
+
+    // Carrito
+    document.getElementById('finalizarVenta').onclick = finalizarVenta;
+    document.getElementById('limpiarCarrito').onclick = limpiarCarrito;
+
+    // Pagos
+    document.getElementById('efectivo').addEventListener('input', verificarPago);
+    document.getElementById('transferencia').addEventListener('input', verificarPago);
+
+    // Búsqueda
+    document.getElementById('buscar').addEventListener('input', () => renderProductos());
+
+    // Reportes
+    document.getElementById('actualizarReportes').onclick = actualizarReportes;
+    document.getElementById('filtroMes').value = new Date().toISOString().slice(0,7);
+  }
+
+  function descargarArchivo(contenido, nombre) {
+    const blob = new Blob([contenido], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombre;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function cargarVentasDeLocal() {
+    const guardadas = localStorage.getItem(STORAGE_VENTAS);
+    ventas = guardadas ? JSON.parse(guardadas) : [];
+  }
+
+  function guardarVentasEnLocal() {
+    localStorage.setItem(STORAGE_VENTAS, JSON.stringify(ventas));
+  }
+
+  // ====================== CATÁLOGO ======================
+  function renderProductos() {
+    const buscar = document.getElementById('buscar').value.toLowerCase();
+    const filtrados = inventario.productos.filter(p => 
+      p.nombre.toLowerCase().includes(buscar) || 
+      (p.categoria && p.categoria.toLowerCase().includes(buscar))
+    );
+    const container = document.getElementById('productList');
+    if (!filtrados.length) {
+      container.innerHTML = '<div>📭 No hay productos</div>';
+      return;
+    }
+    container.innerHTML = filtrados.map(p => `
+      <div class="product-card" data-id="${p.id}">
+        <strong>${p.nombre}</strong><br>
+        <small>${p.categoria || ''}</small>
+        <div class="price">$${p.precioVenta.toFixed(2)}</div>
+        <span class="stock-badge ${p.cantidad <= 3 ? 'low-stock' : ''}">📦 Stock: ${p.cantidad}</span>
+        ${p.cantidad > 0 ? `<button class="add-btn" data-id="${p.id}" style="margin-top:8px; width:100%; background:#2c6e9e;">➕ Agregar</button>` : '<button disabled style="margin-top:8px;">❌ AGOTADO</button>'}
+      </div>
+    `).join('');
+    document.querySelectorAll('.add-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        agregarAlCarrito(parseInt(btn.dataset.id));
+      });
     });
   }
-  
-  // Limpiar toda caché
-  if ('caches' in window) {
-    caches.keys().then(function(names) {
-      for (let name of names) {
-        caches.delete(name);
-        console.log('Caché eliminada:', name);
-      }
-    });
+
+  function agregarAlCarrito(id) {
+    const prod = inventario.productos.find(p => p.id === id);
+    if (!prod || prod.cantidad <= 0) return alert('❌ Sin stock');
+    const existente = carrito.find(i => i.id === id);
+    if (existente) {
+      if (existente.cantidad + 1 > prod.cantidad) return alert(`⚠️ Solo hay ${prod.cantidad} unidades`);
+      existente.cantidad++;
+    } else {
+      carrito.push({ id: prod.id, nombre: prod.nombre, cantidad: 1, precioUnitario: prod.precioVenta, costoUnitario: prod.costo || 0 });
+    }
+    renderCarrito();
   }
-  
-  // Recargar la página después de limpiar (excepto si ya es la primera vez)
-  if (!sessionStorage.getItem('cache_limpia')) {
-    sessionStorage.setItem('cache_limpia', 'true');
-    location.reload(true);
+
+  function renderCarrito() {
+    const container = document.getElementById('cartItems');
+    if (!carrito.length) {
+      container.innerHTML = '🛒 Carrito vacío';
+      document.getElementById('totalCarrito').innerText = '0.00';
+      return;
+    }
+    let html = '', total = 0;
+    carrito.forEach((item, idx) => {
+      const subtotal = item.cantidad * item.precioUnitario;
+      total += subtotal;
+      html += `<div class="cart-item">
+        <span><strong>${item.nombre}</strong> x${item.cantidad}</span>
+        <span>$${subtotal.toFixed(2)} 
+          <button class="remove-one" data-idx="${idx}" style="background:#e67e22; padding:4px 10px;">-1</button>
+          <button class="remove-all" data-idx="${idx}" style="background:#c0392b; padding:4px 10px;">🗑</button>
+        </span>
+      </div>`;
+    });
+    container.innerHTML = html;
+    document.getElementById('totalCarrito').innerText = total.toFixed(2);
+    document.querySelectorAll('.remove-one').forEach(btn => {
+      btn.onclick = () => { const idx = parseInt(btn.dataset.idx); if (carrito[idx].cantidad > 1) carrito[idx].cantidad--; else carrito.splice(idx,1); renderCarrito(); verificarPago(); };
+    });
+    document.querySelectorAll('.remove-all').forEach(btn => {
+      btn.onclick = () => { carrito.splice(parseInt(btn.dataset.idx),1); renderCarrito(); verificarPago(); };
+    });
+    verificarPago();
+  }
+
+  function verificarPago() {
+    const total = parseFloat(document.getElementById('totalCarrito').innerText);
+    const efectivo = parseFloat(document.getElementById('efectivo').value) || 0;
+    const transfer = parseFloat(document.getElementById('transferencia').value) || 0;
+    const suma = efectivo + transfer;
+    const restanteDiv = document.getElementById('restanteMsg');
+    const finalizarBtn = document.getElementById('finalizarVenta');
+    if (suma >= total && total > 0) {
+      restanteDiv.innerHTML = `✅ Pago completo. Cambio en efectivo: $${(suma - total).toFixed(2)}`;
+      finalizarBtn.disabled = false;
+    } else if (total > 0) {
+      restanteDiv.innerHTML = `⚠️ Faltan $${(total - suma).toFixed(2)}`;
+      finalizarBtn.disabled = true;
+    } else {
+      restanteDiv.innerHTML = '';
+      finalizarBtn.disabled = true;
+    }
+  }
+
+  function finalizarVenta() {
+    const total = parseFloat(document.getElementById('totalCarrito').innerText);
+    const efectivo = parseFloat(document.getElementById('efectivo').value) || 0;
+    const transferencia = parseFloat(document.getElementById('transferencia').value) || 0;
+    if (efectivo + transferencia < total) return alert('Pago insuficiente');
+    
+    for (let item of carrito) {
+      const prod = inventario.productos.find(p => p.id === item.id);
+      if (prod) prod.cantidad -= item.cantidad;
+    }
+    
+    const nuevaVenta = {
+      id: Date.now(),
+      fecha: new Date().toISOString(),
+      items: carrito.map(i => ({ id:i.id, nombre:i.nombre, cantidad:i.cantidad, precio:i.precioUnitario, costo:i.costoUnitario })),
+      total: total,
+      efectivo: efectivo,
+      transferencia: transferencia,
+      ganancia: carrito.reduce((acc, i) => acc + (i.cantidad * (i.precioUnitario - i.costoUnitario)), 0)
+    };
+    ventas.push(nuevaVenta);
+    guardarVentasEnLocal();
+    alert(`✅ Venta por $${total.toFixed(2)} registrada`);
+    limpiarCarrito();
+    renderProductos();
+    if (document.getElementById('tabReportes').classList.contains('active')) actualizarReportes();
+  }
+
+  function limpiarCarrito() {
+    carrito = [];
+    document.getElementById('efectivo').value = 0;
+    document.getElementById('transferencia').value = 0;
+    renderCarrito();
+  }
+
+  // ====================== REPORTES ======================
+  function actualizarReportes() {
+    const mes = document.getElementById('filtroMes').value;
+    if (!mes) return;
+    const [year, month] = mes.split('-');
+    const ventasMes = ventas.filter(v => {
+      const d = new Date(v.fecha);
+      return d.getFullYear() == year && (d.getMonth()+1) == parseInt(month);
+    });
+    
+    const hoy = new Date().toISOString().slice(0,10);
+    const ventasHoy = ventas.filter(v => v.fecha.slice(0,10) === hoy);
+    const totalHoy = ventasHoy.reduce((s, v) => s + v.total, 0);
+    document.getElementById('ventasHoy').innerHTML = `${ventasHoy.length} ventas<br><strong>$${totalHoy.toFixed(2)}</strong>`;
+    
+    const totalMesVentas = ventasMes.reduce((s,v) => s+v.total, 0);
+    const totalEfectivo = ventasMes.reduce((s,v) => s+v.efectivo, 0);
+    const totalTransfer = ventasMes.reduce((s,v) => s+v.transferencia, 0);
+    const ganancia = ventasMes.reduce((s,v) => s+v.ganancia, 0);
+    document.getElementById('totalMes').innerHTML = `$${totalMesVentas.toFixed(2)}`;
+    document.getElementById('totalEfectivo').innerHTML = `$${totalEfectivo.toFixed(2)}`;
+    document.getElementById('totalTransferencia').innerHTML = `$${totalTransfer.toFixed(2)}`;
+    document.getElementById('gananciaNeta').innerHTML = `$${ganancia.toFixed(2)}`;
+    
+    const bajoStock = inventario.productos.filter(p => p.cantidad <= 3);
+    document.getElementById('stockBajoLista').innerHTML = bajoStock.length ? bajoStock.map(p => `⚠️ ${p.nombre} (${p.cantidad})`).join(', ') : '✅ Todo en orden';
+    
+    const prodCount = {};
+    ventasMes.forEach(v => {
+      v.items.forEach(item => { prodCount[item.nombre] = (prodCount[item.nombre] || 0) + item.cantidad; });
+    });
+    const top = Object.entries(prodCount).sort((a,b) => b[1]-a[1]).slice(0,5);
+    document.getElementById('topProductos').innerHTML = top.length ? top.map(([nom, cant]) => `${nom}: ${cant} uds`).join('<br>') : 'Sin ventas en el mes';
+  }
+
+  function cambiarTab(tab) {
+    const venderPanel = document.getElementById('venderPanel');
+    const reportesPanel = document.getElementById('reportesPanel');
+    const tabVender = document.getElementById('tabVender');
+    const tabReportes = document.getElementById('tabReportes');
+    if (tab === 'vender') {
+      venderPanel.classList.add('active');
+      reportesPanel.classList.remove('active');
+      tabVender.classList.add('active');
+      tabReportes.classList.remove('active');
+    } else {
+      venderPanel.classList.remove('active');
+      reportesPanel.classList.add('active');
+      tabVender.classList.remove('active');
+      tabReportes.classList.add('active');
+      actualizarReportes();
+    }
   }
 </script>
-<script src="pos.js"></script>
+
 <script>
-  // Funcionalidad del menú hamburguesa
-  document.getElementById('menuIcon').addEventListener('click', function() {
-    const menu = document.getElementById('menuSecundario');
-    menu.classList.toggle('mostrar');
-  });
+  // REGISTRAR SERVICE WORKER SIMPLE (SOLO PARA OFFLINE)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW no registrado:', err));
+  }
 </script>
 </body>
 </html>
