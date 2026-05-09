@@ -1,13 +1,12 @@
 /**
- * SERVICE WORKER
- * Permite que la PWA funcione sin conexión a internet
- * Almacena en caché los archivos principales cuando se instala
+ * SERVICE WORKER - VERSIÓN 2
+ * Cambio de color a azul y reorganización de interfaz
  */
 
-// Nombre de la caché (cambiar para forzar actualizaciones)
+// Nombre de la caché - CAMBIADO para forzar actualización
 const CACHE_NAME = 'mi-mercadito-pos-v2';
 
-// Lista de archivos que queremos cachear para uso offline
+// Archivos a cachear (versión actualizada)
 const ARCHIVOS_CACHE = [
   './',
   './index.html',
@@ -16,48 +15,21 @@ const ARCHIVOS_CACHE = [
   './manifest.json'
 ];
 
-// Evento 'install': ocurre cuando se instala el Service Worker por primera vez
+// Instalación
 self.addEventListener('install', (event) => {
-  console.log('Service Worker instalado');
-  
-  // Esperamos a que termine de cachear todos los archivos
+  console.log('Service Worker v2 instalado');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ARCHIVOS_CACHE);
     })
   );
+  // Forzar activación inmediata
+  self.skipWaiting();
 });
 
-// Evento 'fetch': intercepta todas las peticiones de red
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    // Primero intentamos buscar en la caché
-    caches.match(event.request).then((respuestaCache) => {
-      // Si está en caché, lo devolvemos (rápido y offline)
-      if (respuestaCache) {
-        return respuestaCache;
-      }
-      
-      // Si no está en caché, vamos a la red
-      return fetch(event.request).then((respuestaRed) => {
-        // Opcional: guardar en caché la nueva respuesta para futuras veces
-        // (descomentar si se quiere cachear dinámicamente)
-        /*
-        if (respuestaRed && respuestaRed.status === 200) {
-          const copia = respuestaRed.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, copia);
-          });
-        }
-        */
-        return respuestaRed;
-      });
-    })
-  );
-});
-
-// Evento 'activate': limpia cachés antiguas cuando se actualiza el SW
+// Activación: limpiar cachés antiguas
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker v2 activado');
   event.waitUntil(
     caches.keys().then((nombresCaches) => {
       return Promise.all(
@@ -68,6 +40,34 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    })
+  );
+  // Tomar control de todas las pestañas inmediatamente
+  event.waitUntil(clients.claim());
+});
+
+// Fetch: primero caché, luego red
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((respuestaCache) => {
+      if (respuestaCache) {
+        return respuestaCache;
+      }
+      return fetch(event.request).then((respuestaRed) => {
+        // No cacheamos respuestas de API o archivos dinámicos
+        if (!respuestaRed || respuestaRed.status !== 200) {
+          return respuestaRed;
+        }
+        // Solo cacheamos archivos estáticos (opcional)
+        if (event.request.url.includes('inventario') || event.request.url.includes('ventas')) {
+          return respuestaRed;
+        }
+        const copia = respuestaRed.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, copia);
+        });
+        return respuestaRed;
+      });
     })
   );
 });
