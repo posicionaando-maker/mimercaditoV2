@@ -1,1041 +1,121 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#d9526f">
-    <title>Mi Tiendita POS</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #fdf8f9;
-            padding: 12px;
-        }
-
-        .app {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #d9526f, #c23b58);
-            color: white;
-            padding: 18px;
-            border-radius: 28px;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            font-size: 1.6rem;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .resumen {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: space-between;
-        }
-
-        .resumen-item {
-            background: rgba(255,255,255,0.2);
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-size: 0.85rem;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 24px;
-            background: white;
-            padding: 6px;
-            border-radius: 60px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background: transparent;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            color: #c23b58;
-        }
-
-        .tab.active {
-            background: #d9526f;
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fade 0.25s ease;
-        }
-
-        @keyframes fade {
-            from { opacity: 0; transform: translateY(8px);}
-            to { opacity: 1; transform: translateY(0);}
-        }
-
-        .buscador-container {
-            background: white;
-            padding: 16px;
-            border-radius: 28px;
-            margin-bottom: 20px;
-        }
-
-        #buscarProducto {
-            width: 100%;
-            padding: 14px 18px;
-            border: 1.5px solid #ffe0e6;
-            border-radius: 50px;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        #buscarProducto:focus {
-            border-color: #d9526f;
-        }
-
-        .sugerencias {
-            background: white;
-            border-radius: 20px;
-            margin-top: 10px;
-            max-height: 260px;
-            overflow-y: auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: none;
-            border: 1px solid #ffe0e6;
-        }
-
-        .sugerencias.show {
-            display: block;
-        }
-
-        .sugerencia-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid #ffe0e6;
-            cursor: pointer;
-        }
-
-        .sugerencia-item:hover {
-            background: #fff0f3;
-        }
-
-        .pos-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 700px) {
-            .pos-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .carrito-container, .pago-container {
-            background: white;
-            padding: 20px;
-            border-radius: 28px;
-        }
-
-        .carrito-lista {
-            max-height: 350px;
-            overflow-y: auto;
-            margin: 16px 0;
-            min-height: 150px;
-        }
-
-        .carrito-vacio {
-            text-align: center;
-            color: #d9a5b2;
-            padding: 40px 20px;
-        }
-
-        .carrito-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid #ffe0e6;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .cantidad-control {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .cantidad-control button {
-            background: #fff0f3;
-            border: 1px solid #ffccd6;
-            width: 32px;
-            height: 32px;
-            border-radius: 16px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-eliminar-item {
-            background: #ffe0e6;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 16px;
-            cursor: pointer;
-        }
-
-        .carrito-total {
-            text-align: right;
-            font-size: 1.3rem;
-            padding-top: 12px;
-            border-top: 2px solid #ffb3c4;
-            color: #c23b58;
-        }
-
-        .campo {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 16px 0;
-        }
-
-        .campo label {
-            font-weight: 600;
-            color: #c23b58;
-        }
-
-        .campo input {
-            width: 140px;
-            padding: 10px;
-            border: 1px solid #ffccd6;
-            border-radius: 30px;
-            font-size: 1rem;
-            text-align: right;
-        }
-
-        .total-pagado {
-            background: #fff0f3;
-            padding: 12px;
-            border-radius: 30px;
-            text-align: center;
-            margin: 16px 0;
-        }
-
-        .vuelto-info {
-            text-align: center;
-            padding: 10px;
-            background: #e6f4ea;
-            border-radius: 30px;
-            margin: 12px 0;
-            color: #2e7d32;
-            font-weight: bold;
-            display: none;
-        }
-
-        .btn-cobrar {
-            background: #d9526f;
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 14px;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .inventario-header {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        #filtroCategoria {
-            flex: 1;
-            padding: 12px 18px;
-            border-radius: 50px;
-            border: 1px solid #ffccd6;
-            font-size: 1rem;
-        }
-
-        .btn-nuevo {
-            background: #d9526f;
-            color: white;
-            border: none;
-            padding: 0 28px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .lista-inventario {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-height: 520px;
-            overflow-y: auto;
-        }
-
-        .producto-card {
-            background: white;
-            padding: 16px;
-            border-radius: 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            border-left: 6px solid #d9526f;
-        }
-
-        .producto-info h4 {
-            margin-bottom: 6px;
-            color: #b83b54;
-        }
-
-        .producto-detalle {
-            font-size: 0.8rem;
-            color: #a86c7a;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn-editar, .btn-eliminar {
-            border: none;
-            padding: 6px 16px;
-            border-radius: 40px;
-            cursor: pointer;
-        }
-
-        .btn-editar { background: #ffd966; color: #7a4d1a; }
-        .btn-eliminar { background: #ffe0e6; color: #c23b58; }
-
-        .datos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 24px;
-            border-radius: 28px;
-            text-align: center;
-        }
-
-        .btn-secundario {
-            background: #fff0f3;
-            border: 1px solid #ffccd6;
-            padding: 10px 20px;
-            border-radius: 50px;
-            margin: 6px;
-            cursor: pointer;
-            color: #b83b54;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-contenido {
-            background: white;
-            padding: 28px;
-            border-radius: 40px;
-            width: 90%;
-            max-width: 450px;
-            position: relative;
-        }
-
-        .cerrar {
-            position: absolute;
-            right: 22px;
-            top: 16px;
-            font-size: 28px;
-            cursor: pointer;
-            color: #d9a5b2;
-        }
-
-        #formProducto input {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 60px;
-            border: 1px solid #ffccd6;
-            font-size: 1rem;
-        }
-
-        .btn-guardar {
-            background: #d9526f;
-            color: white;
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 60px;
-            margin-top: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        #prodMargen {
-            display: block;
-            text-align: center;
-            margin: 8px 0;
-            color: #d9526f;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- viewport-fit=cover es importante para que la PWA ocupe toda la pantalla en iPhone con notch -->
+  
+  <title>Mi Mercadito POS</title>
+  
+  <!-- Archivos de la PWA -->
+  <link rel="manifest" href="manifest.json">
+  <!-- icono para agregar a pantalla de inicio en iOS -->
+  <link rel="apple-touch-icon" href="icon-512.png">
+  <!-- color de la barra de estado en Android -->
+  <meta name="theme-color" content="#2c3e50">
+  
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app">
-    <header class="header">
-        <h1>🛒 Mi Tiendita POS</h1>
-        <div class="resumen">
-            <div class="resumen-item">📅 Hoy: <strong id="ventasHoy">$0</strong></div>
-            <div class="resumen-item">💰 Efectivo hoy: <strong id="efectivoHoy">$0</strong></div>
-            <div class="resumen-item">📱 Transfer hoy: <strong id="transferHoy">$0</strong></div>
-            <div class="resumen-item">📆 Mes actual: <strong id="ventasMes">$0</strong></div>
-        </div>
-    </header>
-
-    <nav class="tabs">
-        <button class="tab active" data-tab="pos">🛒 POS</button>
-        <button class="tab" data-tab="inventario">📦 Inventario</button>
-        <button class="tab" data-tab="datos">📁 Datos</button>
-    </nav>
-
-    <div id="pos" class="tab-content active">
-        <div class="buscador-container">
-            <input type="text" id="buscarProducto" placeholder="🔍 Buscar producto...">
-            <div id="sugerencias" class="sugerencias"></div>
-        </div>
-        <div class="pos-grid">
-            <div class="carrito-container">
-                <h3>🛍️ Carrito</h3>
-                <div id="carrito-lista" class="carrito-lista">
-                    <div class="carrito-vacio">✨ Agrega productos desde la búsqueda</div>
-                </div>
-                <div class="carrito-total">Total: <strong>$<span id="totalCarrito">0</span></strong></div>
-            </div>
-            <div class="pago-container">
-                <h3>💸 Pago</h3>
-                <div class="campo">
-                    <label>💵 Efectivo:</label>
-                    <input type="number" id="pagoEfectivo" value="0" step="1">
-                </div>
-                <div class="campo">
-                    <label>📱 Transferencia:</label>
-                    <input type="number" id="pagoTransferencia" value="0" step="1">
-                </div>
-                <div class="total-pagado">💲 Total pagado: <strong>$<span id="totalPagado">0</span></strong></div>
-                <div id="vuelto-info" class="vuelto-info"></div>
-                <button id="btnCobrar" class="btn-cobrar">✔️ COBRAR VENTA</button>
-            </div>
-        </div>
+  
+  <!-- CABECERA: siempre visible -->
+  <header>
+    <h2>🛒 Mi Mercadito POS</h2>
+    <div class="header-buttons">
+      <!-- Los 3 botones principales de importación/exportación -->
+      <button id="btnImportarInventario" class="sec">📂 Importar inventario.json</button>
+      <button id="btnExportarInventario" class="sec">📤 Exportar inventario</button>
+      <button id="btnExportarVentas" class="sec">📊 Exportar ventas.json</button>
     </div>
+  </header>
 
-    <div id="inventario" class="tab-content">
-        <div class="inventario-header">
-            <input type="text" id="filtroCategoria" placeholder="🔍 Filtrar por categoría...">
-            <button id="btnNuevoProducto" class="btn-nuevo">+ Nuevo producto</button>
-        </div>
-        <div id="listaInventario" class="lista-inventario"></div>
-    </div>
+  <!-- PESTAÑAS: permiten cambiar entre vender y ver reportes -->
+  <div class="tabs">
+    <button id="tabVender" class="tab active">🛒 Vender</button>
+    <button id="tabReportes" class="tab">📈 Reportes</button>
+  </div>
 
-    <div id="datos" class="tab-content">
-        <div class="datos-grid">
-            <div class="card"><h3>📤 Exportar</h3><button id="btnExportar" class="btn-secundario">Guardar JSON</button><button id="btnWhatsApp" class="btn-secundario">📱 WhatsApp</button></div>
-            <div class="card"><h3>📥 Importar</h3><button id="btnSeleccionarArchivo" class="btn-secundario">Seleccionar archivo</button><input type="file" id="archivoImportar" accept=".json" style="display:none"></div>
-            <div class="card"><h3>🌐 Sincronizar</h3><input type="text" id="urlGitHub" placeholder="URL del JSON"><button id="btnImportarUrl" class="btn-secundario">Importar</button></div>
+  <!-- PANEL DE VENTAS (visible por defecto) -->
+  <div id="venderPanel" class="panel active">
+    <div class="main-grid">
+      
+      <!-- COLUMNA IZQUIERDA: catálogo de productos -->
+      <div class="products">
+        <h3>📦 Productos</h3>
+        <!-- Campo de búsqueda en tiempo real -->
+        <input type="text" id="buscar" placeholder="🔍 Buscar..." style="width:100%">
+        <!-- Aquí se renderizarán dinámicamente los productos -->
+        <div id="productList" class="product-list">Cargue inventario.json</div>
+      </div>
+
+      <!-- COLUMNA DERECHA: carrito de compras -->
+      <div class="cart">
+        <h3>🧾 Venta actual</h3>
+        <div id="cartItems"></div>
+        <div class="total">Total: <strong>$<span id="totalCarrito">0.00</span></strong></div>
+        
+        <!-- Zona de pago mixto (característica especial para Cuba) -->
+        <div class="pago-section">
+          <label>💰 Efectivo recibido: $<input type="number" id="efectivo" step="any" value="0"></label>
+          <label>💸 Transferencia recibida: $<input type="number" id="transferencia" step="any" value="0"></label>
+          <!-- Mensaje dinámico que muestra si falta dinero o cuánto es el cambio -->
+          <div id="restanteMsg" class="venta-info"></div>
         </div>
+
+        <div class="cart-buttons">
+          <button id="finalizarVenta" class="btn-success" disabled>✅ Finalizar venta</button>
+          <button id="limpiarCarrito" class="btn-danger">🗑 Limpiar carrito</button>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- PANEL DE REPORTES (oculto inicialmente) -->
+  <div id="reportesPanel" class="panel">
+    <div class="reportes-container">
+      <!-- Filtro por mes para ver acumulados -->
+      <div class="filtros">
+        <label>📅 Ver mes: <input type="month" id="filtroMes"></label>
+        <button id="actualizarReportes" class="sec">Actualizar</button>
+      </div>
+      
+      <!-- Cuadrícula de indicadores clave -->
+      <div class="reportes-grid">
+        <div class="reporte-card">
+          <h4>📆 Ventas del día</h4>
+          <div id="ventasHoy">-</div>
+        </div>
+        <div class="reporte-card">
+          <h4>💰 Total acumulado (mes)</h4>
+          <div id="totalMes">-</div>
+        </div>
+        <div class="reporte-card">
+          <h4>💵 Efectivo</h4>
+          <div id="totalEfectivo">-</div>
+        </div>
+        <div class="reporte-card">
+          <h4>📲 Transferencia</h4>
+          <div id="totalTransferencia">-</div>
+        </div>
+        <div class="reporte-card">
+          <h4>📈 Ganancia neta (mes)</h4>
+          <div id="gananciaNeta">-</div>
+        </div>
+        <div class="reporte-card">
+          <h4>⚠️ Stock bajo (≤3)</h4>
+          <div id="stockBajoLista">-</div>
+        </div>
+        <div class="reporte-card full-width">
+          <h4>🏆 Productos más vendidos (mes)</h4>
+          <div id="topProductos">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div id="modalProducto" class="modal">
-    <div class="modal-contenido">
-        <span class="cerrar">&times;</span>
-        <h3 id="modalTitulo">Agregar Producto</h3>
-        <form id="formProducto">
-            <input type="hidden" id="productoId">
-            <input type="text" id="prodNombre" placeholder="Nombre del producto *" required>
-            <input type="text" id="prodCategoria" placeholder="Categoría (ej: Lácteos, Bebidas)">
-            <input type="number" id="prodCantidad" placeholder="Cantidad en stock" value="0" min="0" required>
-            <input type="number" id="prodCosto" placeholder="Costo de compra $" step="0.01" required>
-            <input type="number" id="prodPrecio" placeholder="Precio de venta $" step="0.01" required>
-            <span id="prodMargen">📊 Margen: 0%</span>
-            <button type="submit" class="btn-guardar">✅ Guardar producto</button>
-        </form>
-    </div>
-</div>
-
-<script>
-    // ==================== LOCALSTORAGE ====================
-    let carrito = [];
-    
-    // Datos iniciales de ejemplo
-    const productosIniciales = [
-        { id: 1, nombre: "Leche Entera", categoria: "Lácteos", cantidad: 20, costo: 0.80, precioVenta: 1.20 },
-        { id: 2, nombre: "Pan Integral", categoria: "Panadería", cantidad: 15, costo: 0.50, precioVenta: 0.90 },
-        { id: 3, nombre: "Café Molido", categoria: "Bebidas", cantidad: 10, costo: 2.50, precioVenta: 4.00 },
-        { id: 4, nombre: "Arroz 1kg", categoria: "Granos", cantidad: 30, costo: 0.90, precioVenta: 1.50 },
-        { id: 5, nombre: "Aceite Oliva", categoria: "Aceites", cantidad: 8, costo: 3.50, precioVenta: 5.50 }
-    ];
-    
-    // Cargar productos desde localStorage
-    function cargarProductos() {
-        const stored = localStorage.getItem('productos');
-        if (stored) {
-            return JSON.parse(stored);
-        } else {
-            localStorage.setItem('productos', JSON.stringify(productosIniciales));
-            return productosIniciales;
-        }
-    }
-    
-    function guardarProductos(productos) {
-        localStorage.setItem('productos', JSON.stringify(productos));
-    }
-    
-    function obtenerProductos() {
-        return cargarProductos();
-    }
-    
-    function guardarProducto(producto) {
-        let productos = cargarProductos();
-        if (producto.id) {
-            const index = productos.findIndex(p => p.id === producto.id);
-            if (index !== -1) {
-                productos[index] = producto;
-            }
-        } else {
-            const nuevoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1;
-            producto.id = nuevoId;
-            productos.push(producto);
-        }
-        guardarProductos(productos);
-        return producto;
-    }
-    
-    function eliminarProducto(id) {
-        let productos = cargarProductos();
-        productos = productos.filter(p => p.id !== id);
-        guardarProductos(productos);
-    }
-    
-    // ==================== VENTAS (CORREGIDO) ====================
-    function obtenerVentas() {
-        const stored = localStorage.getItem('ventas');
-        return stored ? JSON.parse(stored) : [];
-    }
-    
-    function guardarVenta(venta) {
-        const ventas = obtenerVentas();
-        // Asegurar que todos los campos numéricos estén correctos
-        const nuevaVenta = {
-            id: Date.now(), // ID único basado en timestamp
-            fecha: new Date().toISOString(),
-            dia: new Date().toISOString().split('T')[0],
-            mes: `${new Date().getFullYear()}-${new Date().getMonth() + 1}`,
-            items: venta.items || [],
-            total: parseFloat(venta.total) || 0,
-            efectivoRecibido: parseFloat(venta.efectivoRecibido) || 0,
-            transferenciaRecibida: parseFloat(venta.transferenciaRecibida) || 0,
-            vuelto: parseFloat(venta.vuelto) || 0
-        };
-        ventas.push(nuevaVenta);
-        localStorage.setItem('ventas', JSON.stringify(ventas));
-        console.log('Venta guardada:', nuevaVenta); // Para depuración
-    }
-    
-    // ==================== ACTUALIZAR RESÚMENES (CORREGIDO) ====================
-    // ==================== ACTUALIZAR RESÚMENES (CORREGIDO - SUMA EFECTIVO + TRANSFERENCIA) ====================
-function actualizarResumen() {
-    const ventas = obtenerVentas();
-    const hoy = new Date().toISOString().split('T')[0];
-    const mesActual = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
-    
-    let totalEfectivoHoy = 0;
-    let totalTransferHoy = 0;
-    let totalEfectivoMes = 0;
-    let totalTransferMes = 0;
-    
-    ventas.forEach(venta => {
-        const efectivo = venta.efectivoRecibido || 0;
-        const transfer = venta.transferenciaRecibida || 0;
-        
-        // Sumar del día
-        if (venta.dia === hoy) {
-            totalEfectivoHoy += efectivo;
-            totalTransferHoy += transfer;
-        }
-        // Sumar del mes
-        if (venta.mes === mesActual) {
-            totalEfectivoMes += efectivo;
-            totalTransferMes += transfer;
-        }
-    });
-    
-    // Mostrar en la interfaz
-    document.getElementById('ventasHoy').innerText = (totalEfectivoHoy + totalTransferHoy).toFixed(2);
-    document.getElementById('efectivoHoy').innerText = totalEfectivoHoy.toFixed(2);
-    document.getElementById('transferHoy').innerText = totalTransferHoy.toFixed(2);
-    document.getElementById('ventasMes').innerText = (totalEfectivoMes + totalTransferMes).toFixed(2);
-    
-    console.log('Resumen corregido:', { 
-        ventasHoy: totalEfectivoHoy + totalTransferHoy, 
-        efectivoHoy: totalEfectivoHoy, 
-        transferHoy: totalTransferHoy,
-        ventasMes: totalEfectivoMes + totalTransferMes 
-    });
-}
-    // Actualizar interfaz
-        document.getElementById('ventasHoy').innerText = ventasHoy.toFixed(2);
-        document.getElementById('efectivoHoy').innerText = efectivoHoy.toFixed(2);
-        document.getElementById('transferHoy').innerText = transferHoy.toFixed(2);
-        document.getElementById('ventasMes').innerText = ventasMes.toFixed(2);
-        
-        console.log('Resumen actualizado:', { ventasHoy, efectivoHoy, transferHoy, ventasMes }); // Depuración
-    }
-    
-    // ==================== FUNCIONES DE APOYO ====================
-    function calcularMargen(costo, precio) {
-        if (precio <= 0) return 0;
-        return ((precio - costo) / precio) * 100;
-    }
-    
-    function escapeHtml(texto) {
-        if (!texto) return '';
-        return texto.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-    
-    // ==================== RENDERIZAR INVENTARIO ====================
-    function renderizarInventario() {
-        const productos = obtenerProductos();
-        const filtro = document.getElementById('filtroCategoria').value.toLowerCase();
-        const filtrados = filtro ? productos.filter(p => (p.categoria || '').toLowerCase().includes(filtro)) : productos;
-        const container = document.getElementById('listaInventario');
-        
-        if (filtrados.length === 0) {
-            container.innerHTML = '<div style="text-align:center;padding:40px;color:#d9a5b2;">📦 No hay productos. Haz clic en "+ Nuevo producto"</div>';
-            return;
-        }
-        
-        container.innerHTML = filtrados.map(p => `
-            <div class="producto-card">
-                <div class="producto-info">
-                    <h4>${escapeHtml(p.nombre)}</h4>
-                    <div class="producto-detalle">
-                        <span>📁 ${escapeHtml(p.categoria) || 'Sin categoría'}</span>
-                        <span>📦 Stock: ${p.cantidad}</span>
-                        <span>💰 $${p.precioVenta.toFixed(2)}</span>
-                        <span>📈 ${calcularMargen(p.costo, p.precioVenta).toFixed(1)}%</span>
-                    </div>
-                </div>
-                <div class="producto-acciones">
-                    <button class="btn-editar" onclick='editarProducto(${JSON.stringify(p).replace(/'/g, "&#39;")})'>✏️ Editar</button>
-                    <button class="btn-eliminar" onclick="eliminarProductoConfirmado(${p.id})">🗑️ Eliminar</button>
-                </div>
-            </div>
-        `).join('');
-    }
-    
-    // ==================== CRUD PRODUCTOS ====================
-    window.editarProducto = function(producto) {
-        document.getElementById('productoId').value = producto.id;
-        document.getElementById('prodNombre').value = producto.nombre;
-        document.getElementById('prodCategoria').value = producto.categoria || '';
-        document.getElementById('prodCantidad').value = producto.cantidad;
-        document.getElementById('prodCosto').value = producto.costo;
-        document.getElementById('prodPrecio').value = producto.precioVenta;
-        document.getElementById('modalTitulo').innerText = 'Editar Producto';
-        document.getElementById('modalProducto').classList.add('show');
-        actualizarMargenPreview();
-    };
-    
-    window.eliminarProductoConfirmado = function(id) {
-        if (confirm('¿Eliminar este producto?')) {
-            eliminarProducto(id);
-            renderizarInventario();
-            actualizarResumen();
-        }
-    };
-    
-    function actualizarMargenPreview() {
-        const costo = parseFloat(document.getElementById('prodCosto').value) || 0;
-        const precio = parseFloat(document.getElementById('prodPrecio').value) || 0;
-        document.getElementById('prodMargen').innerHTML = `📊 Margen: ${calcularMargen(costo, precio).toFixed(1)}%`;
-    }
-    
-    function cerrarModal() {
-        document.getElementById('modalProducto').classList.remove('show');
-        document.getElementById('formProducto').reset();
-        document.getElementById('productoId').value = '';
-    }
-    
-    // Eventos del modal
-    document.getElementById('btnNuevoProducto').onclick = () => {
-        document.getElementById('formProducto').reset();
-        document.getElementById('productoId').value = '';
-        document.getElementById('modalTitulo').innerText = 'Agregar Producto';
-        document.getElementById('modalProducto').classList.add('show');
-        actualizarMargenPreview();
-    };
-    
-    document.querySelector('.cerrar').onclick = cerrarModal;
-    window.onclick = (e) => {
-        if (e.target === document.getElementById('modalProducto')) cerrarModal();
-    };
-    
-    document.getElementById('formProducto').onsubmit = (e) => {
-        e.preventDefault();
-        const nombre = document.getElementById('prodNombre').value.trim();
-        if (!nombre) {
-            alert('El nombre del producto es obligatorio');
-            return;
-        }
-        
-        const producto = {
-            id: parseInt(document.getElementById('productoId').value) || undefined,
-            nombre: nombre,
-            categoria: document.getElementById('prodCategoria').value.trim(),
-            cantidad: parseInt(document.getElementById('prodCantidad').value) || 0,
-            costo: parseFloat(document.getElementById('prodCosto').value) || 0,
-            precioVenta: parseFloat(document.getElementById('prodPrecio').value) || 0
-        };
-        
-        guardarProducto(producto);
-        cerrarModal();
-        renderizarInventario();
-        actualizarResumen();
-    };
-    
-    document.getElementById('prodCosto').addEventListener('input', actualizarMargenPreview);
-    document.getElementById('prodPrecio').addEventListener('input', actualizarMargenPreview);
-    document.getElementById('filtroCategoria').addEventListener('input', renderizarInventario);
-    
-    // ==================== POS - CARRITO ====================
-    function actualizarCarritoUI() {
-        const container = document.getElementById('carrito-lista');
-        let total = 0;
-        
-        if (carrito.length === 0) {
-            container.innerHTML = '<div class="carrito-vacio">🛒 El carrito está vacío</div>';
-            document.getElementById('totalCarrito').innerText = '0';
-            calcularPago();
-            return;
-        }
-        
-        container.innerHTML = carrito.map((item, idx) => {
-            const subtotal = item.cantidad * item.precio;
-            total += subtotal;
-            return `
-                <div class="carrito-item">
-                    <div>
-                        <strong>${escapeHtml(item.nombre)}</strong><br>
-                        <small>$${item.precio.toFixed(2)} c/u</small>
-                    </div>
-                    <div class="cantidad-control">
-                        <button onclick="modificarCantidad(${idx}, -1)">-</button>
-                        <span>${item.cantidad}</span>
-                        <button onclick="modificarCantidad(${idx}, 1)">+</button>
-                        <span><strong>$${subtotal.toFixed(2)}</strong></span>
-                        <button class="btn-eliminar-item" onclick="eliminarDelCarrito(${idx})">🗑️</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        document.getElementById('totalCarrito').innerText = total.toFixed(2);
-        calcularPago();
-    }
-    
-    window.modificarCantidad = function(idx, delta) {
-        const nuevaCantidad = carrito[idx].cantidad + delta;
-        if (nuevaCantidad > 0) {
-            carrito[idx].cantidad = nuevaCantidad;
-        } else {
-            carrito.splice(idx, 1);
-        }
-        actualizarCarritoUI();
-    };
-    
-    window.eliminarDelCarrito = function(idx) {
-        carrito.splice(idx, 1);
-        actualizarCarritoUI();
-    };
-    
-    function agregarAlCarrito(producto) {
-        const existe = carrito.find(p => p.id === producto.id);
-        if (existe) {
-            existe.cantidad++;
-        } else {
-            carrito.push({
-                id: producto.id,
-                nombre: producto.nombre,
-                precio: producto.precioVenta,
-                cantidad: 1
-            });
-        }
-        actualizarCarritoUI();
-        
-        const input = document.getElementById('buscarProducto');
-        const original = input.placeholder;
-        input.placeholder = '✅ Producto agregado!';
-        setTimeout(() => { input.placeholder = original; }, 1000);
-    }
-    
-    // ==================== BÚSQUEDA CON AUTOCOMPLETAR ====================
-    const buscador = document.getElementById('buscarProducto');
-    const sugerenciasDiv = document.getElementById('sugerencias');
-    let timeoutBusqueda;
-    
-    buscador.addEventListener('input', () => {
-        clearTimeout(timeoutBusqueda);
-        const texto = buscador.value.toLowerCase().trim();
-        
-        if (texto.length < 1) {
-            sugerenciasDiv.innerHTML = '';
-            sugerenciasDiv.classList.remove('show');
-            return;
-        }
-        
-        timeoutBusqueda = setTimeout(() => {
-            const productos = obtenerProductos();
-            const filtrados = productos.filter(p => 
-                p.nombre.toLowerCase().includes(texto) && p.cantidad > 0
-            );
-            
-            if (filtrados.length === 0) {
-                sugerenciasDiv.innerHTML = '<div class="sugerencia-item" style="color:#d9a5b2;">❌ No hay productos con stock</div>';
-                sugerenciasDiv.classList.add('show');
-                return;
-            }
-            
-            sugerenciasDiv.innerHTML = filtrados.map(p => `
-                <div class="sugerencia-item" data-id="${p.id}">
-                    <strong>${escapeHtml(p.nombre)}</strong><br>
-                    <small>💰 $${p.precioVenta.toFixed(2)} | 📦 Stock: ${p.cantidad}</small>
-                </div>
-            `).join('');
-            
-            document.querySelectorAll('.sugerencia-item[data-id]').forEach(el => {
-                el.addEventListener('click', () => {
-                    const id = parseInt(el.dataset.id);
-                    const productos = obtenerProductos();
-                    const producto = productos.find(p => p.id === id);
-                    if (producto && producto.cantidad > 0) {
-                        agregarAlCarrito(producto);
-                        buscador.value = '';
-                        sugerenciasDiv.classList.remove('show');
-                    }
-                });
-            });
-            
-            sugerenciasDiv.classList.add('show');
-        }, 300);
-    });
-    
-    document.addEventListener('click', (e) => {
-        if (!buscador.contains(e.target) && !sugerenciasDiv.contains(e.target)) {
-            sugerenciasDiv.classList.remove('show');
-        }
-    });
-    
-    // ==================== CÁLCULO DE PAGO ====================
-    function calcularPago() {
-        const total = parseFloat(document.getElementById('totalCarrito').innerText) || 0;
-        const efectivo = parseFloat(document.getElementById('pagoEfectivo').value) || 0;
-        const transfer = parseFloat(document.getElementById('pagoTransferencia').value) || 0;
-        const totalPagado = efectivo + transfer;
-        document.getElementById('totalPagado').innerText = totalPagado.toFixed(2);
-        
-        const vueltoDiv = document.getElementById('vuelto-info');
-        if (efectivo > total && totalPagado >= total) {
-            vueltoDiv.innerHTML = `🔄 Vuelto en efectivo: $${(efectivo - total).toFixed(2)}`;
-            vueltoDiv.style.display = 'block';
-        } else {
-            vueltoDiv.style.display = 'none';
-        }
-    }
-    
-    document.getElementById('pagoEfectivo').addEventListener('input', calcularPago);
-    document.getElementById('pagoTransferencia').addEventListener('input', calcularPago);
-    
-    // ==================== COBRAR VENTA (CORREGIDO) ====================
-    document.getElementById('btnCobrar').onclick = () => {
-        if (carrito.length === 0) {
-            alert('🛒 El carrito está vacío');
-            return;
-        }
-        
-        const total = parseFloat(document.getElementById('totalCarrito').innerText);
-        const efectivo = parseFloat(document.getElementById('pagoEfectivo').value) || 0;
-        const transfer = parseFloat(document.getElementById('pagoTransferencia').value) || 0;
-        const totalPagado = efectivo + transfer;
-        
-        if (totalPagado < total - 0.01) {
-            alert(`⚠️ Pago insuficiente. Faltan $${(total - totalPagado).toFixed(2)}`);
-            return;
-        }
-        
-        // Verificar stock
-        const productosActuales = obtenerProductos();
-        for (const item of carrito) {
-            const prod = productosActuales.find(p => p.id === item.id);
-            if (!prod || prod.cantidad < item.cantidad) {
-                alert(`❌ Stock insuficiente para "${item.nombre}". Solo quedan ${prod?.cantidad || 0} unidades.`);
-                return;
-            }
-        }
-        
-        // Restar stock
-        for (const item of carrito) {
-            const prod = productosActuales.find(p => p.id === item.id);
-            prod.cantidad -= item.cantidad;
-        }
-        guardarProductos(productosActuales);
-        
-        // Registrar venta con todos los campos necesarios
-        guardarVenta({
-            items: [...carrito],
-            total: total,
-            efectivoRecibido: efectivo,
-            transferenciaRecibida: transfer,
-            vuelto: efectivo > total ? efectivo - total : 0
-        });
-        
-        // Limpiar carrito
-        carrito = [];
-        actualizarCarritoUI();
-        document.getElementById('pagoEfectivo').value = 0;
-        document.getElementById('pagoTransferencia').value = 0;
-        calcularPago();
-        
-        // Actualizar todo
-        renderizarInventario();
-        actualizarResumen();
-        
-        alert(`✅ Venta registrada por $${total.toFixed(2)}`);
-        
-        // Mostrar en consola para depuración
-        console.log('Venta registrada. Total:', total, 'Efectivo:', efectivo, 'Transfer:', transfer);
-    };
-    
-    // ==================== EXPORTAR / IMPORTAR ====================
-    document.getElementById('btnExportar').onclick = () => {
-        const productos = obtenerProductos();
-        const ventas = obtenerVentas();
-        const datos = JSON.stringify({ productos, ventas }, null, 2);
-        const blob = new Blob([datos], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `tiendita_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-    
-    document.getElementById('btnWhatsApp').onclick = () => {
-        alert('📱 Guarda el JSON y compártelo manualmente por WhatsApp');
-    };
-    
-    document.getElementById('btnSeleccionarArchivo').onclick = () => {
-        document.getElementById('archivoImportar').click();
-    };
-    
-    document.getElementById('archivoImportar').onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const datos = JSON.parse(event.target.result);
-                if (datos.productos) localStorage.setItem('productos', JSON.stringify(datos.productos));
-                if (datos.ventas) localStorage.setItem('ventas', JSON.stringify(datos.ventas));
-                alert('✅ Datos importados correctamente');
-                renderizarInventario();
-                actualizarResumen();
-            } catch (err) {
-                alert('❌ Error al importar: archivo inválido');
-            }
-        };
-        reader.readAsText(file);
-    };
-    
-    document.getElementById('btnImportarUrl').onclick = async () => {
-        const url = document.getElementById('urlGitHub').value.trim();
-        if (!url) {
-            alert('Ingresa una URL válida');
-            return;
-        }
-        
-        try {
-            const resp = await fetch(url);
-            if (!resp.ok) throw new Error('Error en la descarga');
-            const datos = await resp.json();
-            if (datos.productos) localStorage.setItem('productos', JSON.stringify(datos.productos));
-            if (datos.ventas) localStorage.setItem('ventas', JSON.stringify(datos.ventas));
-            alert('✅ Sincronizado correctamente');
-            renderizarInventario();
-            actualizarResumen();
-        } catch (err) {
-            alert('❌ Error al importar desde URL');
-        }
-    };
-    
-    // ==================== NAVEGACIÓN ====================
-    function cambiarTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
-    }
-    
-    document.querySelectorAll('.tab').forEach(btn => {
-        btn.addEventListener('click', () => cambiarTab(btn.dataset.tab));
-    });
-    
-    // ==================== INICIALIZACIÓN ====================
-    renderizarInventario();
-    actualizarResumen();
-    cambiarTab('pos');
-</script>
+<!-- JavaScript principal -->
+<script src="pos.js"></script>
 </body>
 </html>
