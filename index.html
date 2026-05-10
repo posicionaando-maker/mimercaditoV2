@@ -9,7 +9,6 @@
   <meta http-equiv="Expires" content="0">
   
   <style>
-    /* ===== TODO EL CSS IGUAL QUE ANTES (no cambia) ===== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #f0f7ff; padding: 12px; }
     .app { max-width: 1400px; margin: 0 auto; }
@@ -76,7 +75,6 @@
     <button id="btnExportarVentas" class="sec">📊 Exportar ventas</button>
     <button id="btnGestionInventario" class="btn-warning">📋 Gestionar Inventario</button>
     <button id="btnVerReportes" class="sec">📈 Ver Reportes</button>
-    <button id="btnProbarReportes" class="btn-warning">🧪 Probar Reportes</button>
   </div>
 
   <!-- PANEL VENDER -->
@@ -135,8 +133,8 @@
     </div>
   </div>
 
-  <!-- MODALES (simplificados) -->
-  <div id="modalEditar" class="modal"><div class="modal-content"><h3>✏️ Editar producto</h3><input type="text" id="editNombre"><input type="text" id="editCategoria"><input type="number" id="editPrecio" step="any"><input type="number" id="editCosto" step="any"><input type="number" id="editStock" step="1"><div class="modal-buttons"><button id="btnGuardarEdicion" class="btn-success">Guardar</button><button id="btnCancelarEdicion" class="btn-danger">Cancelar</button></div></div></div>
+  <!-- MODALES -->
+  <div id="modalEditar" class="modal"><div class="modal-content"><h3>✏️ Editar producto</h3><input type="text" id="editNombre" placeholder="Nombre"><input type="text" id="editCategoria" placeholder="Categoría"><input type="number" id="editPrecio" placeholder="Precio" step="any"><input type="number" id="editCosto" placeholder="Costo" step="any"><input type="number" id="editStock" placeholder="Stock" step="1"><div class="modal-buttons"><button id="btnGuardarEdicion" class="btn-success">Guardar</button><button id="btnCancelarEdicion" class="btn-danger">Cancelar</button></div></div></div>
   <div id="modalAjuste" class="modal"><div class="modal-content"><h3>📦 Ajustar stock</h3><p id="ajusteProductoNombre"></p><input type="number" id="ajusteCantidad" placeholder="Cantidad (+/-)" step="1"><div class="modal-buttons"><button id="btnConfirmarAjuste" class="btn-success">Aplicar</button><button id="btnCancelarAjuste" class="btn-danger">Cancelar</button></div></div></div>
   <div id="modalNuevoProductoGestion" class="modal"><div class="modal-content"><h3>✨ Nuevo producto</h3><input type="text" id="nuevoNombreGestion" placeholder="Nombre"><input type="text" id="nuevoCategoriaGestion" placeholder="Categoría"><input type="number" id="nuevoPrecioGestion" placeholder="Precio" step="any"><input type="number" id="nuevoCostoGestion" placeholder="Costo" step="any"><input type="number" id="nuevoStockGestion" placeholder="Stock" step="1"><div class="modal-buttons"><button id="btnConfirmarNuevoGestion" class="btn-success">Crear</button><button id="btnCancelarNuevoGestion" class="btn-danger">Cancelar</button></div></div></div>
 </div>
@@ -170,7 +168,6 @@
     setupEventListeners();
     renderCarrito();
     cambiarPanel('vender');
-    console.log("Ventas cargadas:", ventas.length);
   });
 
   function setupEventListeners() {
@@ -213,7 +210,6 @@
     document.getElementById('btnCerrarReportes').onclick = () => cambiarPanel('vender');
     document.getElementById('actualizarReportes').onclick = () => actualizarReportes();
     document.getElementById('filtroMes').value = new Date().toISOString().slice(0,7);
-    document.getElementById('btnProbarReportes').onclick = () => probarReportes();
 
     // Ventas
     document.getElementById('finalizarVenta').onclick = finalizarVenta;
@@ -371,25 +367,21 @@
   }
   function limpiarCarrito() { carrito = []; document.getElementById('transferencia').value = 0; renderCarrito(); }
 
-  // ====================== REPORTES CORREGIDOS ======================
+  // ====================== REPORTES ======================
   function actualizarReportes() {
-    console.log("Actualizando reportes...");
     try {
       const ahora = new Date();
       const hoyStr = ahora.toISOString().split('T')[0];
       
-      // Ventas HOY
       const ventasHoy = ventas.filter(v => v.fecha.split('T')[0] === hoyStr);
       const totalHoy = ventasHoy.reduce((s,v) => s + (v.total||0), 0);
       document.getElementById('ventasHoy').innerHTML = `<strong>$${totalHoy.toFixed(2)}</strong><br>${ventasHoy.length} ventas`;
       
-      // Ventas SEMANA
       const semanaAtras = new Date(ahora); semanaAtras.setDate(ahora.getDate() - 7);
       const ventasSemana = ventas.filter(v => new Date(v.fecha).getTime() >= semanaAtras.getTime());
       const totalSemana = ventasSemana.reduce((s,v) => s + (v.total||0), 0);
       document.getElementById('ventasSemana').innerHTML = `<strong>$${totalSemana.toFixed(2)}</strong><br>${ventasSemana.length} ventas`;
       
-      // Ventas MES (seleccionado)
       const mesSeleccionado = document.getElementById('filtroMes').value;
       let ventasMes = [], totalMes = 0, gananciaMes = 0;
       if (mesSeleccionado) {
@@ -401,30 +393,17 @@
       document.getElementById('ventasMes').innerHTML = `<strong>$${totalMes.toFixed(2)}</strong><br>${ventasMes.length} ventas`;
       document.getElementById('gananciaNeta').innerHTML = `<strong>$${gananciaMes.toFixed(2)}</strong>`;
       
-      // Total GENERAL
       const totalGeneral = ventas.reduce((s,v) => s + (v.total||0), 0);
       document.getElementById('totalGeneral').innerHTML = `<strong>$${totalGeneral.toFixed(2)}</strong><br>${ventas.length} ventas`;
       
-      // Producto más vendido
       const prodCount = {};
       ventas.forEach(v => { if (v.items) v.items.forEach(item => { prodCount[item.nombre] = (prodCount[item.nombre]||0) + (item.cantidad||0); }); });
       const top = Object.entries(prodCount).sort((a,b) => b[1]-a[1])[0];
       document.getElementById('topProducto').innerHTML = top ? `<strong>${top[0]}</strong><br>${top[1]} unidades` : 'Sin ventas aún';
       
-      // Stock bajo
       const bajoStock = inventario.productos ? inventario.productos.filter(p => p.cantidad <= 3) : [];
       document.getElementById('stockBajoLista').innerHTML = bajoStock.length ? bajoStock.map(p => `⚠️ ${p.nombre}: ${p.cantidad} uds`).join('<br>') : '✅ Todo en orden';
-      
-      console.log("Reportes actualizados");
-    } catch(e) { console.error("Error en reportes:", e); alert("Error: "+e.message); }
-  }
-  
-  function probarReportes() {
-    const ventaPrueba = { id: Date.now(), fecha: new Date().toISOString(), items: [{ nombre: "Producto Prueba", cantidad: 2, precio: 10 }], total: 100, efectivo: 100, transferencia: 0, ganancia: 30 };
-    ventas.push(ventaPrueba);
-    guardarVentasEnLocal();
-    actualizarReportes();
-    alert("✅ Venta de prueba agregada. Mira los reportes.");
+    } catch(e) { console.error("Error en reportes:", e); }
   }
 </script>
 </body>
